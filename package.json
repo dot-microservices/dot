@@ -1,0 +1,40 @@
+{
+  "name": "node-dot",
+  "version": "0.2.5",
+  "description": "a tiny microservice library",
+  "keywords": [ "microservice", "microservices", "zero configuration", "auto discovery", "soa" ],
+  "main": "index.js",
+  "scripts": {
+    "test": "chmod +x tests/socket.test && node tests/socket.test | ./node_modules/.bin/tap-spec"
+  },
+  "author": {
+    "name": "Umut Aydin"
+  },
+  "engines": {
+    "node": ">=v8.9.0"
+  },
+  "bugs": {
+    "url": "https://github.com/Dvs-Bilisim/dot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Dvs-Bilisim/dot.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axon": "^2.0.3",
+    "colors": "^1.3.2",
+    "date-fns": "^1.29.0",
+    "is_js": "^0.9.0",
+    "node-discover": "^1.0.0",
+    "portfinder": "^1.0.19",
+    "shortid": "^2.2.13"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.9.1"
+  }
+}

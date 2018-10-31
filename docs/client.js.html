@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: client.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: client.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+const axon = require('axon');
+const is = require('is_js');
+
+const Base = require('./base');
+
+/**
+ * @class Client
+ * @extends {Base}
+ */
+class Client extends Base {
+    /**
+     *Creates an instance of Client.
+     * @param {Object} [options={}]
+     * @memberof Client
+     */
+    constructor(options={}) {
+        super(options);
+
+        this._flag = { f: false };
+        this._messages = [];
+        this._sockets = {};
+        this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
+    }
+
+    /**
+     * @description Fires up when a new service found
+     * @param {Object} ad details about service
+     * @access private
+     * @memberof Client
+     */
+    _serviceFound(ad) {
+        if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
+        else if (is.not.number(ad.advertisement.port)) return;
+        else if (is.not.string(ad.address) || is.not.ip(ad.address)) return;
+        else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
+
+        if (is.string(this.options.group) &amp;&amp; is.not.empty(this.options.group))
+            if (this.options.group !== ad.advertisement.group) {
+                this._dequeue();
+                return;
+            }
+
+        this.success(ad);
+        const socket = axon.socket('req');
+        socket.connect(ad.advertisement.port, ad.address);
+
+        for (let service of ad.advertisement.services) {
+            if (!this._sockets.hasOwnProperty(service)) this._sockets[service] = {};
+            if (!this._sockets[service].hasOwnProperty(ad.id))
+                this._sockets[service][ad.id] = socket;
+        }
+        this._dequeue();
+    }
+
+    /**
+     * @description Fires up when an existing service gone
+     * @param {Object} ad details about service
+     * @access private
+     * @memberof Client
+     */
+    _serviceLost(ad) {
+        if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
+        else if (is.not.number(ad.advertisement.port)) return;
+        else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
+
+        this.warning(ad);
+        for (let service of ad.advertisement.services) {
+            if (this._sockets.hasOwnProperty(service))
+                if (this._sockets[service].hasOwnProperty(ad.id)) {
+                    try {
+                        this._sockets[service][ad.id].close();
+                    } catch(e) {
+                        this.fail(e.toString());
+                    }
+                    delete this._sockets[service][ad.id];
+                }
+        }
+    }
+
+    /**
+     * @description Finds a valid socket for service
+     * @param {String} service
+     * @returns socket
+     * @access private
+     * @memberof Client
+     */
+    _getSocket(service) {
+        if (!this._sockets.hasOwnProperty(service)) return null;
+
+        const sockets = Object.keys(this._sockets[service]);
+        if (!sockets.length) return null;
+
+        return this._sockets[service][sockets[Math.floor(Math.random() * sockets.length)]];
+    }
+
+    /**
+     * @description Puts messages into queue
+     * @param {Array} request example: [path, payload, callback]
+     * @throws Error
+     * @access private
+     * @memberof Client
+     */
+    _enqueue(request) {
+        if (is.not.array(request) || request.length &lt; 3)
+            throw new Error('request must be an array with at least 3 items: path, payload, callback');
+        else if (is.not.function(request[2]))
+            throw new Error('callback (2nd item) must be a function');
+
+        if (request.length === 3) request.push(Date.now());
+        else if (is.not.number(request[3]) || request[3] &lt;= 0) request[3] = Date.now();
+        this._messages.push(request);
+    }
+
+    /**
+     * @description Consumes pending messages in the queue
+     * @access private
+     * @memberof Client
+     */
+    _dequeue() {
+        if (!this._messages.length) return this._flag.f = false;
+        else if (this._flag.f) return;
+
+        this._flag.f = true;
+        const message = this._messages.shift();
+        const delay = this.options.delay;
+        if (is.number(delay) &amp;&amp; delay > 0)
+            if (Date.now() - message[3] &lt; delay)
+                process.nextTick(() => this.send(message[0], message[1], message[2], message[3]));
+            else message[2](new Error('SERVICE_TIMEOUT'));
+
+        setTimeout(() => {
+            this._flag.f = false;
+            this._dequeue();
+        }, 20);
+    }
+
+    /**
+     * @description Sends a request
+     * @param {String} path service call
+     * @param {Any} payload data
+     * @param {Function} cb callback
+     * @param {Number} [timestamp=0]
+     * @memberof Client
+     */
+    send(path, payload, cb, timestamp = 0) {
+        if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
+
+        const delimiter = this.options.delimiter;
+        const delay = this.options.delay;
+        const timeout = this.options.timeout;
+        const service = path.split(is.string(delimiter) &amp;&amp; is.not.empty(delimiter) ? delimiter : '.').shift();
+        const socket = this._getSocket(service);
+        if (socket) {
+            let t_o = null;
+            try {
+                if (is.number(timeout) &amp;&amp; timeout > 0)
+                    t_o = setTimeout(() => {
+                        t_o = null;
+                        cb(new Error('REQUEST_TIMEOUT'));
+                    }, timeout);
+                socket.send(path, payload, response => {
+                    if (t_o) {
+                        clearTimeout(t_o);
+                        if (is.existy(response) &amp;&amp; is.not.string(response)) return cb(response);
+
+                        cb(new Error(is.empty(response) ? 'INVALID_RESPONSE' : new Error(response)));
+                    }
+                });
+            } catch(e) {
+                this.fail(e.toString());
+                cb(e);
+            }
+        }
+        else if (is.number(delay) &amp;&amp; delay > 0)
+            this._enqueue([ path, payload, cb, timestamp > 0 ? timestamp : 0 ]);
+        else cb(new Error('INVALID_SERVICE'));
+    }
+
+    /**
+     * @description Closes client sockets
+     * @memberof Client
+     */
+    disconnect() {
+        for (let service of Object.keys(this._sockets))
+            for (let id of Object.keys(this._sockets[service])) {
+                this._sockets[service][id].close();
+                this.warning(`${ service } @ ${ id } closed`);
+            }
+    }
+}
+
+module.exports = Client;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base.html">Base</a></li><li><a href="Base.Base.html">Base</a></li><li><a href="Client.html">Client</a></li><li><a href="Client.Client.html">Client</a></li><li><a href="Server.html">Server</a></li><li><a href="Server.Server.html">Server</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Oct 31 2018 08:47:57 GMT+0300 (+03)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

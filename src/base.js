@@ -2,7 +2,7 @@
 
 const colors = require('colors/safe');
 const discover = require('node-discover');
-const formatDate = require('date-fns').format;
+const formatDate = require('date-fns/format');
 const is = require('is_js');
 
 /**

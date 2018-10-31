@@ -100,7 +100,7 @@ First, you should start server instance. Then execute following command:
 
 Your results should be similar to following values:
 
-    total time spent for 10000 requests is 0.05 seconds
+    total time spent for 10000 requests is 0.54 seconds
     min processing time is 0.13 seconds
     max processing time is 0.38 seconds
     average processing time is 0.24 seconds

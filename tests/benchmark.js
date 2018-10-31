@@ -24,7 +24,7 @@ function request(i) {
         if (duration > total.max) total.max = duration;
 
         if (i === limit) {
-            console.log(`total time spent for ${ limit } requests is ${ ((Date.now() - started) / total.count).toFixed(2) } seconds`);
+            console.log(`total time spent for ${ limit } requests is ${ ((Date.now() - started) / 1000).toFixed(2) } seconds`);
             console.log(`min processing time is ${ (total.min / 1000).toFixed(2) } seconds`);
             console.log(`max processing time is ${ (total.max / 1000).toFixed(2) } seconds`);
             console.log(`average processing time is ${ (total.time / total.count / 1000).toFixed(2) } seconds`);

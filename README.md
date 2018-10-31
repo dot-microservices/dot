@@ -8,12 +8,21 @@
 
     npm i --save node-dot
 
+You can still clone this repository and make use of it yourself.
+
+    git clone git@github.com:Dvs-Bilisim/dot.git
+    cd dot
+    npm i
+    npm test
+
 ## Components
 
 There are 2 simple components:
 
 - **Server  :** ~100 LOC, extends Base (~50 LOC)
 - **Client  :** ~150 LOC, extends Base (~50 LOC)
+
+*Documentation lines are not included to LOC values.*
 
 *Server* will automatically manage routing between client and *Service* instances.
 String responses are reserved for errors. If you send a string back, it means that an error occured.

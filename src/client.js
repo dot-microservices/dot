@@ -5,8 +5,17 @@ const is = require('is_js');
 
 const Base = require('./base');
 
+/**
+ * @class Client
+ * @extends {Base}
+ */
 class Client extends Base {
-    constructor(options) {
+    /**
+     *Creates an instance of Client.
+     * @param {Object} [options={}]
+     * @memberof Client
+     */
+    constructor(options={}) {
         super(options);
 
         this._flag = { f: false };
@@ -15,6 +24,12 @@ class Client extends Base {
         this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
     }
 
+    /**
+     * @description Fires up when a new service found
+     * @param {Object} ad details about service
+     * @access private
+     * @memberof Client
+     */
     _serviceFound(ad) {
         if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
         else if (is.not.number(ad.advertisement.port)) return;
@@ -39,6 +54,12 @@ class Client extends Base {
         this._dequeue();
     }
 
+    /**
+     * @description Fires up when an existing service gone
+     * @param {Object} ad details about service
+     * @access private
+     * @memberof Client
+     */
     _serviceLost(ad) {
         if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
         else if (is.not.number(ad.advertisement.port)) return;
@@ -58,6 +79,13 @@ class Client extends Base {
         }
     }
 
+    /**
+     * @description Finds a valid socket for service
+     * @param {String} service
+     * @returns socket
+     * @access private
+     * @memberof Client
+     */
     _getSocket(service) {
         if (!this._sockets.hasOwnProperty(service)) return null;
 
@@ -67,6 +95,13 @@ class Client extends Base {
         return this._sockets[service][sockets[Math.floor(Math.random() * sockets.length)]];
     }
 
+    /**
+     * @description Puts messages into queue
+     * @param {Array} request example: [path, payload, callback]
+     * @throws Error
+     * @access private
+     * @memberof Client
+     */
     _enqueue(request) {
         if (is.not.array(request) || request.length < 3)
             throw new Error('request must be an array with at least 3 items: path, payload, callback');
@@ -78,6 +113,11 @@ class Client extends Base {
         this._messages.push(request);
     }
 
+    /**
+     * @description Consumes pending messages in the queue
+     * @access private
+     * @memberof Client
+     */
     _dequeue() {
         if (!this._messages.length) return this._flag.f = false;
         else if (this._flag.f) return;
@@ -96,6 +136,14 @@ class Client extends Base {
         }, 20);
     }
 
+    /**
+     * @description Sends a request
+     * @param {String} path service call
+     * @param {Any} payload data
+     * @param {Function} cb callback
+     * @param {Number} [timestamp=0]
+     * @memberof Client
+     */
     send(path, payload, cb, timestamp = 0) {
         if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
 
@@ -130,6 +178,10 @@ class Client extends Base {
         else cb(new Error('INVALID_SERVICE'));
     }
 
+    /**
+     * @description Closes client sockets
+     * @memberof Client
+     */
     disconnect() {
         for (let service of Object.keys(this._sockets))
             for (let id of Object.keys(this._sockets[service])) {

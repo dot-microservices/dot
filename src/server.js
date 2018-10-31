@@ -7,7 +7,16 @@ const shortid = require('shortid');
 
 const Base = require('./base');
 
+/**
+ * @class Server
+ * @extends {Base}
+ */
 class Server extends Base {
+    /**
+     *Creates an instance of Server.
+     * @param {Object} [options={}]
+     * @memberof Server
+     */
     constructor(options = {}) {
         super(options);
 
@@ -17,6 +26,11 @@ class Server extends Base {
         this._listen();
     }
 
+    /**
+     * @description Registers a service class
+     * @param {Class} service
+     * @memberof Server
+     */
     addService(service) {
         if (is.not.function(service)) throw new Error('service must be a class');
 
@@ -24,13 +38,23 @@ class Server extends Base {
         this._services[name] = service;
     }
 
+    /**
+     * @description Registers a list of service classes
+     * @param {Array} services
+     * @memberof Server
+     */
     addServices(services) {
         if (is.not.array(services)) throw new Error('you must provide an array of services');
 
         for (let service of services) this.addService(service);
     }
 
-    start() {
+    /**
+     * @description Starts server instance
+     * @param {Function} cbErr callback for error only
+     * @memberof Server
+     */
+    start(cbErr) {
         if (this._flag.s) throw new Error('already started');
 
         this._flag.s = true;
@@ -40,10 +64,16 @@ class Server extends Base {
             this.options.port = port;
             this._socket.bind(this.options.port);
         }).catch(error => {
-            throw error;
+            if (is.function(cbErr)) cbErr(error);
         });
     }
 
+    /**
+     * @description Handles incoming messages to server socket
+     * @throws Error
+     * @access private
+     * @memberof Server
+     */
     _onMessage() {
         if (this._flag.m) throw new Error('already listening');
 
@@ -64,6 +94,12 @@ class Server extends Base {
         });
     }
 
+    /**
+     * @description Binds all required listeners
+     * @throws Error
+     * @access private
+     * @memberof Server
+     */
     _listen() {
         if (this._flag.l) throw new Error('already listening');
 

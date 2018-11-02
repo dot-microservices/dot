@@ -29,6 +29,7 @@ class Server extends Base {
     /**
      * @description Registers a service class
      * @param {Class} service
+     * @throws Error
      * @memberof Server
      */
     addService(service) {
@@ -41,6 +42,7 @@ class Server extends Base {
     /**
      * @description Registers a list of service classes
      * @param {Array} services
+     * @throws Error
      * @memberof Server
      */
     addServices(services) {
@@ -55,7 +57,7 @@ class Server extends Base {
      * @memberof Server
      */
     start(cbErr) {
-        if (this._flag.s) throw new Error('already started');
+        if (this._flag.s) cbErr(new Error('already started'));
 
         this._flag.s = true;
         portfinder.getPortPromise({

@@ -1,6 +1,7 @@
 # dot
 
 **dot** is a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices.
+Please see [this article](http://umuplus.tumblr.com/post/179665842906/dot-yet-another-microservice-framework) to find out more.
 
 ![Dot Schema](https://raw.githubusercontent.com/Dvs-Bilisim/dot/master/dot.png "Dot Schema")
 

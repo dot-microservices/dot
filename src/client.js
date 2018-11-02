@@ -103,13 +103,12 @@ class Client extends Base {
      * @memberof Client
      */
     _enqueue(request) {
-        if (is.not.array(request) || request.length < 3)
-            throw new Error('request must be an array with at least 3 items: path, payload, callback');
-        else if (is.not.function(request[2]))
-            throw new Error('callback (2nd item) must be a function');
+        if (is.not.array(request) || request.length < 4)
+            throw new Error('request must be an array with at least 3 items: path, payload, timeout, callback');
+        else if (is.not.function(request[3]))
+            throw new Error('callback (3nd item) must be a function');
 
-        if (request.length === 3) request.push(Date.now());
-        else if (is.not.number(request[3]) || request[3] <= 0) request[3] = Date.now();
+        if (is.not.number(request[2]) || request[2] <= 0) request[2] = Date.now();
         this._messages.push(request);
     }
 
@@ -126,9 +125,9 @@ class Client extends Base {
         const message = this._messages.shift();
         const delay = this.options.delay;
         if (is.number(delay) && delay > 0)
-            if (Date.now() - message[3] < delay)
+            if (Date.now() - message[2] < delay)
                 process.nextTick(() => this.send(message[0], message[1], message[2], message[3]));
-            else message[2](new Error('SERVICE_TIMEOUT'));
+            else message[3](new Error('SERVICE_TIMEOUT'));
 
         setTimeout(() => {
             this._flag.f = false;
@@ -140,29 +139,34 @@ class Client extends Base {
      * @description Sends a request
      * @param {String} path service call
      * @param {Any} payload data
+     * @param {Number} [timestamp]
      * @param {Function} cb callback
-     * @param {Number} [timestamp=0]
      * @memberof Client
      */
-    send(path, payload, cb, timestamp = 0) {
+    send(path, payload, timestamp, cb) {
         if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
+
+        if (is.function(timestamp)) {
+            cb = timestamp;
+            timestamp = 0;
+        }
 
         const delimiter = this.options.delimiter;
         const delay = this.options.delay;
-        const timeout = this.options.timeout;
+        const timeout = this.options.timeout, useTimeout = is.number(timeout) && timeout > 0;
         const service = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.').shift();
         const socket = this._getSocket(service);
         if (socket) {
             let t_o = null;
             try {
-                if (is.number(timeout) && timeout > 0)
+                if (useTimeout)
                     t_o = setTimeout(() => {
                         t_o = null;
                         cb(new Error('REQUEST_TIMEOUT'));
                     }, timeout);
                 socket.send(path, payload, response => {
-                    if (t_o) {
-                        clearTimeout(t_o);
+                    if (!useTimeout || t_o) {
+                        if (t_o) clearTimeout(t_o);
                         if (is.existy(response) && is.not.string(response)) return cb(response);
 
                         cb(new Error(is.empty(response) ? 'INVALID_RESPONSE' : new Error(response)));
@@ -174,7 +178,7 @@ class Client extends Base {
             }
         }
         else if (is.number(delay) && delay > 0)
-            this._enqueue([ path, payload, cb, timestamp > 0 ? timestamp : 0 ]);
+            this._enqueue([ path, payload, timestamp > 0 ? timestamp : 0, cb ]);
         else cb(new Error('INVALID_SERVICE'));
     }
 

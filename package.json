@@ -2,7 +2,7 @@
   "name": "node-dot",
   "version": "0.2.5",
   "description": "a tiny microservice library",
-  "keywords": [ "microservice", "microservices", "zero configuration", "auto discovery", "soa" ],
+  "keywords": [ "microservice", "microservices", "soa", "rpc", "zero configuration", "zero-conf", "auto discovery" ],
   "main": "index.js",
   "scripts": {
     "test": "chmod +x tests/socket.test && node tests/socket.test | ./node_modules/.bin/tap-spec"

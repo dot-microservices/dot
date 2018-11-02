@@ -10,7 +10,7 @@
 
 You can still clone this repository and make use of it yourself.
 
-    git clone git@github.com:Dvs-Bilisim/dot.git
+    git clone https://github.com/Dvs-Bilisim/dot.git
     cd dot
     npm i
     npm test

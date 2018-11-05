@@ -7,14 +7,18 @@ Please see [this article](http://umuplus.tumblr.com/post/179665842906/dot-yet-an
 
 ## Install
 
-    npm i --save node-dot
+```bash
+npm i --save node-dot
+```
 
 You can still clone this repository and make use of it yourself.
 
-    git clone https://github.com/Dvs-Bilisim/dot.git
-    cd dot
-    npm i
-    npm test
+```bash
+git clone https://github.com/Dvs-Bilisim/dot.git
+cd dot
+npm i
+npm test
+```
 
 ## Components
 
@@ -66,26 +70,30 @@ You can configure that by *delimeter* parameter.
 
 ### Example Server
 
-    const Server = require('node-dot').Server;
+```js
+const Server = require('node-dot').Server;
 
-    class SampleService {
-        static test(request, reply) {
-            reply(request);
-        }
+class SampleService {
+    static test(request, reply) {
+        reply(request);
     }
+}
 
-    const server = new Server();
-    server.addService(SampleService);
-    server.start();
+const server = new Server();
+server.addService(SampleService);
+server.start();
+```
 
 ### Example Client
 
-    const Client = require('node-dot').Client;
+```js
+const Client = require('node-dot').Client;
 
-    const client = new Client();
-    client.send('sampleService.test', request, response => {
-        console.log(response);
-    });
+const client = new Client();
+client.send('sampleService.test', request, response => {
+    console.log(response);
+});
+```
 
 ### Benchmark
 
@@ -97,7 +105,9 @@ Test device specifications.
 
 First, you should start server instance. Then execute following command:
 
-    node tests/benchmark.js
+```bash
+node tests/benchmark.js
+```
 
 Your results should be similar to following values:
 

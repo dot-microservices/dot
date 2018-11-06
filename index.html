@@ -1,1 +1,223 @@
-dot
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta content="IE=edge" http-equiv="X-UA-Compatible">
+        <meta content="width=device-width,initial-scale=1" name="viewport">
+        <meta content="a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices" name="description">
+        <meta content="Umut Aydin" name="author">
+        <title>dot</title>
+        <link href="./main.550dcf66.css" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <nav class="navbar navbar-default active">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#navbar-collapse" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="/">dot</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="navbar-collapse">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><p><a href="https://github.com/Dvs-Bilisim/dot" class="btn btn-default navbar-btn">Github</a></p></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <img src="https://raw.githubusercontent.com/Dvs-Bilisim/dot/master/dot.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Install</h3>
+                        <blockquote>npm i --save node-dot</blockquote>
+                        <p>You can also clone this repository and make use of it yourself.</p>
+<pre>git clone https://github.com/Dvs-Bilisim/dot.git
+cd dot
+npm i
+npm test</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Components</h3>
+                        <p>There are 2 simple components:</p>
+                        <ul>
+                            <li><b>Server :</b> ~100 LOC, extends Base (~50 LOC)</li>
+                            <li><b>Client :</b> ~150 LOC, extends Base (~50 LOC)</li>
+                        </ul>
+                        <p><i>Documentation lines are not included to LOC values.</i></p>
+                        <p>Server will automatically manage routing between client and Service instances.
+                            String responses are reserved for errors. If you send a string back, it means that an error occured.
+                            Client is for sending requests.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Configuration</h3>
+                        <h3>Server</h3>
+                        <ul>
+                            <li><b>debug :</b> Debug mode. It's disabled by default.</li>
+                            <li><b>delimiter :</b> Delimiter between service and method names. It's a single dot(.) by default.</li>
+                            <li><b>group :</b> This parameter is for grouping services. If you set a value, client instance connects matched servers only.</li>
+                            <li><b>port :</b> Start point for port range. If you set server instance looks up for its port starting from this number. It's 8000 by default.</li>
+                            <li><b>secret :</b> Encryption key for auto discovery feature. It's a string "dot" by default.</li>
+                        </ul>
+                        <h3>Client</h3>
+                        <ul>
+                            <li><b>debug :</b> Debug mode. It's disabled by default.</li>
+                            <li><b>delay :</b> This parameter provides some time before actually trying to send incoming requests.
+                                Thus, client sockets would be initiated correctly before trying to send anything.</li>
+                            <li><b>delimiter :</b> Delimiter between service and method names. It must be same value in server and client instances.
+                                It's a single dot(.) by default.</li>
+                            <li><b>group :</b> This parameter is for grouping services. If you set a value, client instance connects matched servers only.</li>
+                            <li><b>secret :</b> Encryption key for auto discovery feature. It's a string "dot" by default.</li>
+                            <li><b>timeout :</b> Request timeout. Socket communication has auto recovery feature but in some cases you might want to have a timeout option.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Error Types</h3>
+                        <p>To have a better understanding on error types, there are a few more things to explain.
+                            A service is the name of your Service class in camel-case form and each static function in that class is called method.
+                            On client-side, you need to concatenate service name and method with delimiter as path. Default delimiter is a single dot(.).
+                            You can configure that by delimeter parameter.</p>
+                        <ul>
+                            <li><b>INVALID_METHOD :</b> Requested method doesn't exist in your service class</li>
+                            <li><b>INVALID_PATH :</b> Path parameter is not a valid string</li>
+                            <li><b>INVALID_RESPONSE :</b> Service sent an invalid response back</li>
+                            <li><b>INVALID_SERVICE :</b> Requested service doesn't exist</li>
+                            <li><b>MISSING_METHOD :</b> Method is not a valid string</li>
+                            <li><b>REQUEST_TIMEOUT :</b> Request sent via socket but no response in allowed amount of time</li>
+                            <li><b>SERVICE_TIMEOUT :</b> No service found to send the request in allowed amount of time</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Example Server</h3>
+<pre>const Server = require('node-dot').Server;
+
+class SampleService {
+    static test(request, reply) {
+        reply(request);
+    }
+}
+
+const server = new Server();
+server.addService(SampleService);
+server.start();</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Example Client</h3>
+<pre>const Client = require('node-dot').Client;
+
+const client = new Client();
+client.send('sampleService.test', request, response => {
+    console.log(response);
+});</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 col-md-8 col-md-offset-2">
+                        <h3 class="text-center">Benchmark</h3>
+                        <p>Test device specifications:</p>
+                        <ul>
+                            <li>Dell XPS 13</li>
+                            <li>Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz 4 Cores</li>
+                            <li>8 GB Ram</li>
+                        </ul>
+                        <p>First, you should start server instance. Then execute following command:</p>
+                        <blockquote>node tests/benchmark.js</blockquote>
+                        <p>Your results should be similar to following values:</p>
+<pre>total time spent for 10000 requests is 0.52 seconds
+min processing time is 0.13 seconds
+max processing time is 0.38 seconds
+average processing time is 0.24 seconds</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer-container white-text-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h3>dot</h3>
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-7">
+                                <p>a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices</p>
+                                <p><small>Website created with <a href="http://www.mashup-template.com/" title="Create website with free html template">Mashup
+                                    Template</a>/<a href="https://www.unsplash.com/" title="Beautiful Free Images">Unsplash</a></small></p>
+                            </div>
+                            <div class="col-xs-12 col-sm-5">
+                            <p class="text-right">
+                                <a href="https://github.com/Dvs-Bilisim/dot" class="social-round-icon white-round-icon fa-icon">
+                                    <i class="fa fa-github" aria-hidden="true"></i>
+                                </a>
+                            </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script>
+            document.addEventListener("DOMContentLoaded", function (event) {
+                navActivePage();
+                scrollRevelation('.reveal');
+            });
+        </script>
+        <script type="text/javascript" src="./main.0cf8b554.js"></script>
+    </body>
+</html>

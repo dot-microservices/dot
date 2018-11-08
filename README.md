@@ -11,7 +11,7 @@ Please see [this article](http://umuplus.tumblr.com/post/179665842906/dot-yet-an
 npm i --save node-dot
 ```
 
-You can still clone this repository and make use of it yourself.
+You can also clone this repository and make use of it yourself.
 
 ```bash
 git clone https://github.com/Dvs-Bilisim/dot.git

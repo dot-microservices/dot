@@ -89,6 +89,7 @@ class Server extends Base {
             const service = path.shift(), method = path.shift();
             if (!this._services.hasOwnProperty(service)) return reply('INVALID_SERVICE');
             else if (!method || is.empty(method)) return reply('MISSING_METHOD');
+            else if (method.charAt(0) === '_') return reply('INVALID_METHOD');
             else if (!this._services[service].hasOwnProperty(method)) return reply('INVALID_METHOD');
             else if (is.not.function(this._services[service][method])) return reply('INVALID_METHOD');
 

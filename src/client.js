@@ -155,7 +155,7 @@ class Client extends Base {
         const delay = this.options.delay;
         const timeout = this.options.timeout, useTimeout = is.number(timeout) && timeout > 0;
         const service = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
-        if (service < 2) return cb(new Error('MISSING_METHOD'));
+        if (service.length < 2) return cb(new Error('MISSING_METHOD'));
         else if (!service[1].trim().length || service[1].charAt(0) === '_')
             return cb(new Error('INVALID_METHOD'));
 

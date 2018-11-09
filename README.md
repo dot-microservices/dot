@@ -111,7 +111,7 @@ node tests/benchmark.js
 
 Your results should be similar to following values:
 
-    total time spent for 10000 requests is 0.52 seconds
-    min processing time is 0.13 seconds
-    max processing time is 0.38 seconds
-    average processing time is 0.24 seconds
+    total time spent for 25000 requests is 1.12 seconds
+    min processing time is 0.14 seconds
+    max processing time is 0.98 seconds
+    average processing time is 0.40 seconds

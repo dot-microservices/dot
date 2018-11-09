@@ -7,7 +7,7 @@ const client = new Client({ secret: 'test', group: 'test', timeout: 3000, delay:
 
 const payload = Math.random();
 
-const total = { time: 0, count: 0, error: 0 }, limit = 10000;
+const total = { time: 0, count: 0, error: 0 }, limit = 25000;
 let started = 0;
 
 function request(i) {

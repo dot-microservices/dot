@@ -2,7 +2,9 @@
 
 const axon = require('axon');
 const is = require('is_js');
+const joinPath = require('path').join;
 const portfinder = require('portfinder');
+const readdir = require('fs').readdir;
 const shortid = require('shortid');
 
 const Base = require('./base');
@@ -49,6 +51,24 @@ class Server extends Base {
         if (is.not.array(services)) throw new Error('you must provide an array of services');
 
         for (let service of services) this.addService(service);
+    }
+
+    /**
+     * @description Registers
+     * @param {String} dir relative path
+     * @throws Error
+     * @memberof Server
+     */
+    addPath(dir) {
+        if (is.not.string(dir)) throw new Error('you must provide a path to service classes');
+
+        dir = joinPath(__dirname, dir);
+        readdir(dir, (error, files) => {
+            if (error) throw error;
+
+            for (let file of files)
+                this.addService(require(joinPath(dir, file)));
+        });
     }
 
     /**

@@ -1,6 +1,7 @@
 'use strict';
 
 const axon = require('axon');
+const exists = require('fs').existsSync;
 const is = require('is_js');
 const joinPath = require('path').join;
 const portfinder = require('portfinder');
@@ -37,7 +38,7 @@ class Server extends Base {
     addService(service) {
         if (is.not.function(service)) throw new Error('service must be a class');
 
-        const name = this.fixServiceName(service.name);
+        const name = this.fixServiceName(service);
         this._services[name] = service;
     }
 
@@ -62,7 +63,7 @@ class Server extends Base {
     addPath(dir) {
         if (is.not.string(dir)) throw new Error('you must provide a path to service classes');
 
-        dir = joinPath(__dirname, dir);
+        if (!exists(dir)) dir = joinPath(__dirname, dir);
         readdir(dir, (error, files) => {
             if (error) throw error;
 

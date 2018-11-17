@@ -83,12 +83,14 @@ class Base {
 
     /**
      * @description Makes service name camel-case
-     * @param {String} name service name
+     * @param {String} service service class
      * @access private
      * @memberof Base
      */
-    fixServiceName(name) {
-        return `${ name.charAt(0).toLowerCase() }${ name.slice(1) }`;
+    fixServiceName(service) {
+        if (service.hasOwnProperty('_name') && is.function(service._name)) return service._name();
+
+        return `${ service.name.charAt(0).toLowerCase() }${ service.name.slice(1) }`;
     }
 }
 

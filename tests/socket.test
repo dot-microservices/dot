@@ -17,7 +17,7 @@ test('Check basic socket communication', function (assert) {
     let started = false;
 
     const payload = Math.random();
-    client.send('testService.echo', payload, response => {
+    client.send('t.echo', payload, response => {
         started = true;
         if (is.error(response)) assert.fail(response.toString());
         else if (response === payload) assert.ok(response, `${response} received successfully!`);

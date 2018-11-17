@@ -12,7 +12,7 @@ let started = 0;
 
 function request(i) {
     const now = Date.now();
-    client.send('testService.echo', payload, response => {
+    client.send('t.echo', payload, response => {
         if (is.error(response)) total.error++;
         total.count++;
 

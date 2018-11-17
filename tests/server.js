@@ -5,6 +5,10 @@
 const Server = require('../src/server');
 
 class TestService {
+    static _name() {
+        return 't';
+    }
+
     static echo(request, reply) {
         reply(request);
     }

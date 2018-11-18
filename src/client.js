@@ -36,11 +36,17 @@ class Client extends Base {
         else if (is.not.string(ad.address) || is.not.ip(ad.address)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
-        if (is.string(this.options.group) && is.not.empty(this.options.group))
+        if (is.string(this.options.group) && is.not.empty(this.options.group)) {
             if (this.options.group !== ad.advertisement.group) {
                 this._dequeue();
                 return;
             }
+        } else if (is.array(this.options.group) && is.not.empty(this.options.group)) {
+            if (this.options.group.indexOf(ad.advertisement.group) < 0) {
+                this._dequeue();
+                return;
+            }
+        }
 
         this.success(ad);
         const socket = axon.socket('req');
@@ -144,12 +150,11 @@ class Client extends Base {
      * @memberof Client
      */
     send(path, payload, timestamp, cb) {
-        if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
-
         if (is.function(timestamp)) {
             cb = timestamp;
             timestamp = 0;
         }
+        if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
 
         const delimiter = this.options.delimiter;
         const delay = this.options.delay;

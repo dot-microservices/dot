@@ -3,7 +3,7 @@
 const Client = require('../src/client');
 const is = require('is_js');
 
-const client = new Client({ secret: 'test', group: 'test', timeout: 3000, delay: 2000 });
+const client = new Client({ secret: 'test', group: [ 'test' ], timeout: 3000, delay: 2000 });
 
 const payload = Math.random();
 

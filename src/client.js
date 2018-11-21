@@ -153,7 +153,11 @@ class Client extends Base {
         if (is.function(timestamp)) {
             cb = timestamp;
             timestamp = 0;
+        } else if (is.not.function(cb)) {
+            cb = function() {};
+            if (is.not.number(timestamp)) timestamp = 0;
         }
+
         if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
 
         const delimiter = this.options.delimiter;

@@ -56,14 +56,14 @@ class Server extends Base {
 
     /**
      * @description Registers
-     * @param {String} dir relative path
+     * @param {String} dir full path
      * @throws Error
      * @memberof Server
      */
     addPath(dir) {
         if (is.not.string(dir)) throw new Error('you must provide a path to service classes');
+        else if (!exists(dir)) throw new Error('invalid path');
 
-        if (!exists(dir)) dir = joinPath(__dirname, dir);
         readdir(dir, (error, files) => {
             if (error) throw error;
 

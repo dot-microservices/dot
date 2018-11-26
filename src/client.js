@@ -178,12 +178,10 @@ class Client extends Base {
                         cb(new Error('REQUEST_TIMEOUT'));
                     }, timeout);
                 socket.send(path, payload, response => {
-                    if (!useTimeout || t_o) {
-                        if (t_o) clearTimeout(t_o);
-                        if (is.existy(response) && is.not.string(response)) return cb(response);
+                    if (t_o) clearTimeout(t_o);
+                    if (is.existy(response) && is.not.string(response)) return cb(response);
 
-                        cb(new Error(is.empty(response) ? 'INVALID_RESPONSE' : new Error(response)));
-                    }
+                    cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
                 });
             } catch(e) {
                 this.fail(e.toString());

@@ -21,9 +21,10 @@ class Server extends Base {
      * @memberof Server
      */
     constructor(options = {}) {
-        super(options);
+        super(Object.assign({ shutdown: 5000 }, options));
 
         this._flag = { l: false, m: false, s: false };
+        this._lock = false;
         this._services = {};
         this._socket = axon.socket('rep');
         this._listen();
@@ -102,14 +103,28 @@ class Server extends Base {
 
         this._flag.m = true;
         this._socket.on('message', (path, payload, reply) => {
+            if (this._lock) return reply('LOCKED'); // clean shutdown on progress
             if (is.not.string(path) || is.empty(path)) return reply('INVALID_PATH');
 
             const delimiter = this.options.delimiter;
             path = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
 
             const service = path.shift(), method = path.shift();
-            if (!this._services.hasOwnProperty(service)) return reply('INVALID_SERVICE');
-            else if (!method || is.empty(method)) return reply('MISSING_METHOD');
+            if (!this._services.hasOwnProperty(service)) {
+                if (service === this.COMMAND_CLEAN_SHUTDOWN) {
+                    this._lock = true;
+                    const shutdown = this.options.shutdown;
+                    let waitUntil = is.number(shutdown) && shutdown > 0 ? shutdown : 1000;
+                    if (is.object(payload) && is.number(payload.shutdown)) waitUntil = payload.shutdown;
+                    this.warning(`clean shutdown in ${ waitUntil } miliseconds...`);
+                    setTimeout(() => {
+                        if (this.ad) this.ad.stop();
+                        this._socket.close();
+                        this.success('server closed');
+                    }, waitUntil);
+                    return reply({ cmd: '#KILL', s: true });
+                } else return reply('INVALID_SERVICE');
+            } else if (!method || is.empty(method)) return reply('MISSING_METHOD');
             else if (method.charAt(0) === '_') return reply('INVALID_METHOD');
             else if (!this._services[service].hasOwnProperty(method)) return reply('INVALID_METHOD');
             else if (is.not.function(this._services[service][method])) return reply('INVALID_METHOD');
@@ -138,15 +153,15 @@ class Server extends Base {
                 }
             });
         });
-        this._socket.on('error', (error) => {
+        this._socket.on('error', error => {
             this.fail(error);
         });
-        this._socket.on('connect', (s) => {
+        this._socket.on('connect', s => {
             s._id = shortid();
             if (s._peername && s._peername.address) s._ip = s._peername.address;
             this.success(`${ s._id }@${ s._ip } connected`);
         });
-        this._socket.on('disconnect', (s) => {
+        this._socket.on('disconnect', s => {
             this.warning(`${ s._id }@${ s._ip } disconnected`);
         });
         this._onMessage();

@@ -19,6 +19,7 @@ class Base {
         this.options = { delimiter: '.', secret: 'dot' };
         if (is.object(options) && is.not.array(options))
             this.options = Object.assign(this.options, options);
+        this.COMMAND_CLEAN_SHUTDOWN = '#CLEAN_SHUTDOWN';
     }
 
     /**

@@ -37,15 +37,11 @@ class Client extends Base {
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
         if (is.string(this.options.group) && is.not.empty(this.options.group)) {
-            if (this.options.group !== ad.advertisement.group) {
-                this._dequeue();
-                return;
-            }
+            if (this.options.group !== ad.advertisement.group)
+                return this._dequeue();
         } else if (is.array(this.options.group) && is.not.empty(this.options.group)) {
-            if (this.options.group.indexOf(ad.advertisement.group) < 0) {
-                this._dequeue();
-                return;
-            }
+            if (!this.options.group.includes(ad.advertisement.group))
+                return this._dequeue();
         }
 
         this.success(ad);
@@ -191,6 +187,30 @@ class Client extends Base {
         else if (is.number(delay) && delay > 0)
             this._enqueue([ path, payload, timestamp > 0 ? timestamp : 0, cb ]);
         else cb(new Error('INVALID_SERVICE'));
+    }
+
+    /**
+     * @description Sends a clean shutdown request
+     * @param {String} [target] service
+     * @param {Number} [delay] clean shutdown
+     * @param {Function} [cb] callback
+     * @memberof Client
+     */
+    shutdown(target, delay, cb) {
+        if (is.function(delay)) {
+            cb = delay;
+            delay = -1;
+        }
+        if (is.not.function(cb)) cb = () => null;
+        if (is.not.number(delay)) delay = -1;
+        const sockets = {};
+        for (let service of Object.keys(this._sockets))
+            if (is.not.existy(target) || service === target)
+                for (let id of Object.keys(this._sockets[service]))
+                    if (!sockets.hasOwnProperty(id)) sockets[id] = this._sockets[service][id];
+
+        for (let id of Object.keys(sockets))
+            sockets[id].send(this.COMMAND_CLEAN_SHUTDOWN, { shutdown: delay }, cb);
     }
 
     /**

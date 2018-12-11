@@ -90,6 +90,7 @@ npm test</pre>
                             <li><b>group :</b> This parameter is for grouping services. If you set a value, client instance connects matched servers only.</li>
                             <li><b>port :</b> Start point for port range. If you set server instance looks up for its port starting from this number. It's 8000 by default.</li>
                             <li><b>secret :</b> Encryption key for auto discovery feature. It's a string "dot" by default.</li>
+                            <li><b>shutdown :</b> Delay for clean shutdown. It's 5000 miliseconds by default.</li>
                         </ul>
                         <h3>Client</h3>
                         <ul>
@@ -121,6 +122,7 @@ npm test</pre>
                             <li><b>INVALID_PATH :</b> Path parameter is not a valid string</li>
                             <li><b>INVALID_RESPONSE :</b> Service sent an invalid response back</li>
                             <li><b>INVALID_SERVICE :</b> Requested service doesn't exist</li>
+                            <li><b>LOCKED :</b> Clean shutdown on progress</li>
                             <li><b>MISSING_METHOD :</b> Method is not a valid string</li>
                             <li><b>REQUEST_TIMEOUT :</b> Request sent via socket but no response in allowed amount of time</li>
                             <li><b>SERVICE_TIMEOUT :</b> No service found to send the request in allowed amount of time</li>

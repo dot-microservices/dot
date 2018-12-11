@@ -42,6 +42,7 @@ String responses are reserved for errors. If you send a string back, it means th
 - **group       :** This parameter is for grouping services. If you set a value, client instance connects matched servers only.
 - **port        :** Start point for port range. If you set server instance looks up for its port starting from this number. It's 8000 by default.
 - **secret      :** Encryption key for auto discovery feature. It's a string "dot" by default.
+- **shutdown    :** Min. delay for clean shutdown. It's 5000 miliseconds by default.
 
 ### Client
 
@@ -64,6 +65,7 @@ You can configure that by *delimeter* parameter.
 - **INVALID_PATH        :** Path parameter is not a valid string
 - **INVALID_RESPONSE    :** Service sent an invalid response back
 - **INVALID_SERVICE     :** Requested service doesn't exist
+- **LOCKED              :** Clean shutdown on progress
 - **MISSING_METHOD      :** Method is not a valid string
 - **REQUEST_TIMEOUT     :** Request sent via socket but no response in allowed amount of time
 - **SERVICE_TIMEOUT     :** No service found to send the request in allowed amount of time

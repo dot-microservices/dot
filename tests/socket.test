@@ -22,11 +22,13 @@ test('Check basic socket communication', function (assert) {
         if (is.error(response)) assert.fail(response.toString());
         else if (response === payload) assert.ok(response, `${response} received successfully!`);
         else assert.fail('invalid response');
-        child.stdin.pause();
-        child.kill();
-        client.disconnect();
-        assert.end();
-        process.exit(0);
+        client.shutdown();
+        child.on('exit', () => {
+            child.kill();
+            client.disconnect();
+            assert.end();
+            process.exit(0);
+        });
     });
 
     setTimeout(() => {

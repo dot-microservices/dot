@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "a tiny microservice library",
   "keywords": [ "microservice", "microservices", "soa", "rpc", "zero configuration", "zero-conf", "auto discovery" ],
   "main": "index.js",

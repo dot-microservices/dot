@@ -34,7 +34,8 @@ class Base {
         let advertising = { key: this.options.secret };
         if (is.object(options) && is.not.array(options))
             advertising = Object.assign(advertising, options);
-
+        if (is.object(this.options.discover) && is.not.array(this.options.discover))
+            advertising = Object.assign(advertising, this.options.discover);
         this.ad = discover(advertising);
         if (is.function(added)) this.ad.on('added', added);
         if (is.function(removed)) this.ad.on('removed', removed);

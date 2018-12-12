@@ -14,6 +14,7 @@ class TestService {
     }
 }
 
-const server = new Server({ secret: 'test', group: 'test' });
+const server = new Server({ secret: 'wrong value', group: 'test', discover: { key: 'test' } });
+// * discover.key overwrites secret which has an obvious "wrong value"
 server.addService(TestService);
 server.start();

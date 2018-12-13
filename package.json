@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "a tiny microservice library",
   "keywords": [ "microservice", "microservices", "soa", "rpc", "zero configuration", "zero-conf", "auto discovery" ],
   "main": "index.js",
@@ -13,6 +13,7 @@
   "engines": {
     "node": ">=v6.14.4"
   },
+  "homepage": "https://dot.js.org/",
   "bugs": {
     "url": "https://github.com/Dvs-Bilisim/dot/issues"
   },

@@ -197,7 +197,11 @@ class Client extends Base {
      * @memberof Client
      */
     shutdown(target, delay, cb) {
-        if (is.function(delay)) {
+        if (is.function(target)) {
+            cb = target;
+            delay = -1;
+            target = undefined;
+        } else if (is.function(delay)) {
             cb = delay;
             delay = -1;
         }

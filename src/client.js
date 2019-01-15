@@ -74,7 +74,7 @@ class Client extends Base {
                     try {
                         this._sockets[service][ad.id].close();
                     } catch(e) {
-                        this.fail(e.toString());
+                        this.fail(e.message);
                     }
                     delete this._sockets[service][ad.id];
                 }
@@ -180,7 +180,7 @@ class Client extends Base {
                     cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
                 });
             } catch(e) {
-                this.fail(e.toString());
+                this.fail(e.message);
                 cb(e);
             }
         }

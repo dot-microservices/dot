@@ -19,9 +19,10 @@ class Client extends Base {
         super(options);
 
         this._flag = { f: false };
+        this._instances = [];
         this._messages = [];
         this._sockets = {};
-        this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
+        this._serviceRegistry();
     }
 
     /**
@@ -44,7 +45,11 @@ class Client extends Base {
                 return this._dequeue();
         }
 
+        const address = `${ ad.address }:${ ad.advertisement.port }`;
+        if (this._instances.includes(address)) return this._dequeue();
+
         this.success(ad);
+        this._instances.push(address);
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
 
@@ -227,6 +232,31 @@ class Client extends Base {
                 this._sockets[service][id].close();
                 this.warning(`${ service } @ ${ id } closed`);
             }
+    }
+
+    /**
+     * @description Handles service registry procedure by provided options
+     * @access private
+     * @memberof Client
+     */
+    _serviceRegistry() {
+        if (!this.options.hasOwnProperty('redis'))
+            return this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
+
+        if (is.not.function(this.options.redis.publish))
+            throw new Error('redis parameter must be an instance of ioredis client');
+
+        this.options.redis.on('message', (channel, ad) => {
+            try {
+                ad = JSON.parse(ad);
+                if (channel === 'up') this._serviceFound(ad);
+                else if (channel === 'down') this._serviceLost(ad);
+            } catch (e) {
+                return;
+            }
+        });
+
+        this.options.redis.subscribe('up', 'down');
     }
 }
 

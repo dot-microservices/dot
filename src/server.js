@@ -3,7 +3,9 @@
 const axon = require('axon');
 const exists = require('fs').existsSync;
 const is = require('is_js');
+const localIP = require('local-ip');
 const joinPath = require('path').join;
+const onShutdown = require('exit-hook');
 const portfinder = require('portfinder');
 const readdir = require('fs').readdir;
 const shortid = require('shortid');
@@ -115,7 +117,8 @@ class Server extends Base {
                     this._lock = true;
                     const shutdown = this.options.shutdown;
                     let waitUntil = is.number(shutdown) && shutdown > 0 ? shutdown : 1000;
-                    if (is.object(payload) && is.number(payload.shutdown)) waitUntil = payload.shutdown;
+                    if (is.object(payload) && is.number(payload.shutdown) && payload.shutdown > 0)
+                        waitUntil = payload.shutdown;
                     this.warning(`clean shutdown in ${ waitUntil } miliseconds...`);
                     setTimeout(() => {
                         if (this.ad) this.ad.stop();
@@ -145,13 +148,7 @@ class Server extends Base {
         this._flag.l = true;
         this._socket.on('bind', () => {
             this.success(`ready on #${ this.options.port }`);
-            this.advertise({
-                advertisement: {
-                    port: this.options.port,
-                    group: this.options.group,
-                    services: Object.keys(this._services)
-                }
-            });
+            this._serviceRegistry();
         });
         this._socket.on('error', error => {
             this.fail(error);
@@ -165,6 +162,40 @@ class Server extends Base {
             this.warning(`${ s._id }@${ s._ip } disconnected`);
         });
         this._onMessage();
+    }
+
+    /**
+     * @description Handles service registry procedure by provided options
+     * @access private
+     * @memberof Server
+     */
+    _serviceRegistry() {
+        if (!this.options.hasOwnProperty('redis'))
+            return this.advertise({
+                advertisement: {
+                    port: this.options.port,
+                    group: this.options.group,
+                    services: Object.keys(this._services)
+                }
+            });
+
+        if (is.not.function(this.options.redis.publish))
+            throw new Error('redis parameter must be an instance of ioredis client');
+
+        const advertisement = JSON.stringify({
+            address: localIP(this.options.iface),
+            advertisement: {
+                port: this.options.port,
+                group: this.options.group,
+                services: Object.keys(this._services)
+            }
+        });
+        let interval = setInterval(() => this.options.redis.publish('up', advertisement),
+            is.object(this.options.discover) ? this.options.discover.checkInterval || 3000 : 3000);
+        onShutdown(() => {
+            clearInterval(interval);
+            this.options.redis.publish('down', advertisement, () => process.exit(0));
+        });
     }
 }
 

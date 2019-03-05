@@ -16,7 +16,7 @@ class Base {
      * @memberof Base
      */
     constructor(options) {
-        this.options = { delimiter: '.', secret: 'dot' };
+        this.options = { delimiter: '.', iface: 'eth0', secret: 'dot' };
         if (is.object(options) && is.not.array(options))
             this.options = Object.assign(this.options, options);
         this.COMMAND_CLEAN_SHUTDOWN = '#CLEAN_SHUTDOWN';

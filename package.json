@@ -1,11 +1,20 @@
 {
   "name": "node-dot",
-  "version": "0.5.6",
+  "version": "0.7.2",
   "description": "a tiny microservice library",
-  "keywords": [ "microservice", "microservices", "soa", "rpc", "zero configuration", "zero-conf", "auto discovery" ],
+  "keywords": [
+    "microservice",
+    "microservices",
+    "soa",
+    "rpc",
+    "zero configuration",
+    "zero-conf",
+    "auto discovery",
+    "service registry"
+  ],
   "main": "index.js",
   "scripts": {
-    "test": "chmod +x tests/socket.test && node tests/socket.test | ./node_modules/.bin/tap-spec"
+    "test": "chmod +x tests/client.test && node tests/client.test | ./node_modules/.bin/tap-spec"
   },
   "author": {
     "name": "Umut Aydin"
@@ -26,15 +35,18 @@
     "axon": "^2.0.3",
     "colors": "^1.3.2",
     "date-fns": "^1.29.0",
+    "exit-hook": "^2.0.0",
     "is_js": "^0.9.0",
+    "local-ip": "^2.0.0",
     "node-discover": "^1.0.0",
     "portfinder": "^1.0.19",
     "shortid": "^2.2.13"
   },
   "devDependencies": {
-    "eslint": "^5.7.0",
+    "eslint": "^5.15.1",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
+    "ioredis": "^4.6.2",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1"
   }

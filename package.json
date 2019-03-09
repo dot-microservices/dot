@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "a tiny microservice library",
   "keywords": [
     "microservice",
@@ -14,7 +14,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "chmod +x tests/client.test && node tests/client.test | ./node_modules/.bin/tap-spec"
+    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec"
   },
   "author": {
     "name": "Umut Aydin"

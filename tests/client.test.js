@@ -8,7 +8,7 @@ const is = require('is_js');
 const { spawn } = require('child_process');
 const test = require('tape').test;
 
-const client = new Client({ secret: 'test', group: 'test', timeout: 2000, delay: 2500 });
+const client = new Client({ secret: 'test', group: 'test', timeout: 4000, delay: 3000 });
 
 const server = buildPath(__dirname, '/server.js');
 const child = spawn(server);

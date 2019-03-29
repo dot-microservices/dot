@@ -212,14 +212,16 @@ class Client extends Base {
         }
         if (is.not.function(cb)) cb = () => null;
         if (is.not.number(delay)) delay = -1;
-        const sockets = {};
         for (let service of Object.keys(this._sockets))
             if (is.not.existy(target) || service === target)
-                for (let id of Object.keys(this._sockets[service]))
-                    if (!sockets.hasOwnProperty(id)) sockets[id] = this._sockets[service][id];
-
-        for (let id of Object.keys(sockets))
-            sockets[id].send(this.COMMAND_CLEAN_SHUTDOWN, { shutdown: delay }, cb);
+                for (let id of Object.keys(this._sockets[service])) {
+                    try {
+                        this._sockets[service][id]
+                            .send(this.COMMAND_CLEAN_SHUTDOWN, { shutdown: delay }, cb);
+                    } catch (e) {
+                        this.fail(`${ service } @ ${ id } ${ e.message }`);
+                    }
+                }
     }
 
     /**
@@ -232,6 +234,7 @@ class Client extends Base {
                 this._sockets[service][id].close();
                 this.warning(`${ service } @ ${ id } closed`);
             }
+        if (this.ad) this.ad.stop();
     }
 
     /**

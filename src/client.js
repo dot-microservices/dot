@@ -235,6 +235,10 @@ class Client extends Base {
                 this.warning(`${ service } @ ${ id } closed`);
             }
         if (this.ad) this.ad.stop();
+        if (this.options.redis) {
+            this.options.redis.unsubscribe();
+            this.options.redis.disconnect();
+        }
     }
 
     /**

@@ -5,7 +5,6 @@ const exists = require('fs').existsSync;
 const is = require('is_js');
 const localIP = require('local-ip');
 const joinPath = require('path').join;
-const onShutdown = require('exit-hook');
 const portfinder = require('portfinder');
 const readdir = require('fs').readdir;
 const shortid = require('shortid');
@@ -121,8 +120,7 @@ class Server extends Base {
                         waitUntil = payload.shutdown;
                     this.warning(`clean shutdown in ${ waitUntil } miliseconds...`);
                     setTimeout(() => {
-                        if (this.ad) this.ad.stop();
-                        this._socket.close();
+                        this.shutdown();
                         this.success('server closed');
                     }, waitUntil);
                     return reply({ cmd: '#KILL', s: true });
@@ -182,7 +180,18 @@ class Server extends Base {
         if (is.not.function(this.options.redis.publish))
             throw new Error('redis parameter must be an instance of ioredis client');
 
-        const advertisement = JSON.stringify({
+        this.interval = setInterval(() => this.options.redis.publish('up', this.__payload()),
+            is.object(this.options.discover) ? this.options.discover.checkInterval || 3000 : 3000);
+    }
+
+    /**
+     * @description returns advertising payload
+     * @returns {string}
+     * @access private
+     * @memberof Server
+     */
+    __payload() {
+        return JSON.stringify({
             address: localIP(this.options.iface),
             advertisement: {
                 port: this.options.port,
@@ -190,12 +199,20 @@ class Server extends Base {
                 services: Object.keys(this._services)
             }
         });
-        let interval = setInterval(() => this.options.redis.publish('up', advertisement),
-            is.object(this.options.discover) ? this.options.discover.checkInterval || 3000 : 3000);
-        onShutdown(() => {
-            clearInterval(interval);
-            this.options.redis.publish('down', advertisement, () => process.exit(0));
-        });
+    }
+
+    /**
+     * @description stops the server instance
+     * @memberof Server
+     */
+    shutdown() {
+        if (this.ad) this.ad.stop();
+        this._socket.close();
+        if (this.interval) clearInterval(this.interval);
+        if (this.options.redis) {
+            this.options.redis.publish('down', this.__payload());
+            this.options.redis.disconnect();
+        }
     }
 }
 

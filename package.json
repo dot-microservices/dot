@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",

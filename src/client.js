@@ -20,7 +20,6 @@ class Client extends Base {
 
         this._flag = { f: false };
         this._instances = [];
-        this._messages = [];
         this._sockets = {};
         this._serviceRegistry();
     }
@@ -37,17 +36,7 @@ class Client extends Base {
         else if (is.not.string(ad.address) || is.not.ip(ad.address)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
-        if (is.string(this.options.group) && is.not.empty(this.options.group)) {
-            if (this.options.group !== ad.advertisement.group)
-                return this._dequeue();
-        } else if (is.array(this.options.group) && is.not.empty(this.options.group)) {
-            if (!this.options.group.includes(ad.advertisement.group))
-                return this._dequeue();
-        }
-
         const address = `${ ad.address }:${ ad.advertisement.port }`;
-        if (this._instances.includes(address)) return this._dequeue();
-
         this.success(ad);
         this._instances.push(address);
         const socket = axon.socket('req');
@@ -58,7 +47,6 @@ class Client extends Base {
             if (!this._sockets[service].hasOwnProperty(ad.id))
                 this._sockets[service][ad.id] = socket;
         }
-        this._dequeue();
     }
 
     /**
@@ -103,46 +91,6 @@ class Client extends Base {
     }
 
     /**
-     * @description Puts messages into queue
-     * @param {Array} request example: [path, payload, callback]
-     * @throws Error
-     * @access private
-     * @memberof Client
-     */
-    _enqueue(request) {
-        if (is.not.array(request) || request.length < 4)
-            throw new Error('request must be an array with at least 3 items: path, payload, timeout, callback');
-        else if (is.not.function(request[3]))
-            throw new Error('callback (3nd item) must be a function');
-
-        if (is.not.number(request[2]) || request[2] <= 0) request[2] = Date.now();
-        this._messages.push(request);
-    }
-
-    /**
-     * @description Consumes pending messages in the queue
-     * @access private
-     * @memberof Client
-     */
-    _dequeue() {
-        if (!this._messages.length) return this._flag.f = false;
-        else if (this._flag.f) return;
-
-        this._flag.f = true;
-        const message = this._messages.shift();
-        const delay = this.options.delay;
-        if (is.number(delay) && delay > 0)
-            if (Date.now() - message[2] < delay)
-                process.nextTick(() => this.send(message[0], message[1], message[2], message[3]));
-            else message[3](new Error('SERVICE_TIMEOUT'));
-
-        setTimeout(() => {
-            this._flag.f = false;
-            this._dequeue();
-        }, 20);
-    }
-
-    /**
      * @description Sends a request
      * @param {String} path service call
      * @param {Any} payload data
@@ -162,7 +110,6 @@ class Client extends Base {
         if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
 
         const delimiter = this.options.delimiter;
-        const delay = this.options.delay;
         const timeout = this.options.timeout, useTimeout = is.number(timeout) && timeout > 0;
         const service = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
         if (service.length < 2) return cb(new Error('MISSING_METHOD'));
@@ -188,40 +135,31 @@ class Client extends Base {
                 this.fail(e.message);
                 cb(e);
             }
-        }
-        else if (is.number(delay) && delay > 0)
-            this._enqueue([ path, payload, timestamp > 0 ? timestamp : 0, cb ]);
-        else cb(new Error('INVALID_SERVICE'));
+        } else cb(new Error('INVALID_SERVICE'));
     }
 
     /**
      * @description Sends a clean shutdown request
      * @param {String} [target] service
-     * @param {Number} [delay] clean shutdown
      * @param {Function} [cb] callback
      * @memberof Client
      */
-    shutdown(target, delay, cb) {
+    shutdown(target, cb) {
         if (is.function(target)) {
             cb = target;
-            delay = -1;
             target = undefined;
-        } else if (is.function(delay)) {
-            cb = delay;
-            delay = -1;
         }
         if (is.not.function(cb)) cb = () => null;
-        if (is.not.number(delay)) delay = -1;
         for (let service of Object.keys(this._sockets))
             if (is.not.existy(target) || service === target)
                 for (let id of Object.keys(this._sockets[service])) {
                     try {
-                        this._sockets[service][id]
-                            .send(this.COMMAND_CLEAN_SHUTDOWN, { shutdown: delay }, cb);
+                        this._sockets[service][id].send(this.COMMAND_CLEAN_SHUTDOWN, {});
                     } catch (e) {
                         this.fail(`${ service } @ ${ id } ${ e.message }`);
                     }
                 }
+        cb();
     }
 
     /**

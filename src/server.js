@@ -25,7 +25,6 @@ class Server extends Base {
         super(Object.assign({ shutdown: 5000 }, options));
 
         this._flag = { l: false, m: false, s: false };
-        this._lock = false;
         this._services = {};
         this._socket = axon.socket('rep');
         this._listen();
@@ -104,7 +103,6 @@ class Server extends Base {
 
         this._flag.m = true;
         this._socket.on('message', (path, payload, reply) => {
-            if (this._lock) return reply('LOCKED'); // clean shutdown on progress
             if (is.not.string(path) || is.empty(path)) return reply('INVALID_PATH');
 
             const delimiter = this.options.delimiter;
@@ -113,17 +111,7 @@ class Server extends Base {
             const service = path.shift(), method = path.shift();
             if (!this._services.hasOwnProperty(service)) {
                 if (service === this.COMMAND_CLEAN_SHUTDOWN) {
-                    this._lock = true;
-                    const shutdown = this.options.shutdown;
-                    let waitUntil = is.number(shutdown) && shutdown > 0 ? shutdown : 1000;
-                    if (is.object(payload) && is.number(payload.shutdown) && payload.shutdown > 0)
-                        waitUntil = payload.shutdown;
-                    this.warning(`clean shutdown in ${ waitUntil } miliseconds...`);
-                    setTimeout(() => {
-                        this.shutdown();
-                        this.success('server closed');
-                    }, waitUntil);
-                    return reply({ cmd: '#KILL', s: true });
+                    return this.shutdown();
                 } else return reply('INVALID_SERVICE');
             } else if (!method || is.empty(method)) return reply('MISSING_METHOD');
             else if (method.charAt(0) === '_') return reply('INVALID_METHOD');
@@ -213,6 +201,7 @@ class Server extends Base {
             this.options.redis.publish('down', this.__payload());
             this.options.redis.disconnect();
         }
+        this.success('server closed');
     }
 }
 

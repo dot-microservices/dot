@@ -29,7 +29,7 @@ function request(i) {
             console.log(`max processing time is ${ (total.max / 1000).toFixed(2) } seconds`);
             console.log(`average processing time is ${ (total.time / total.count / 1000).toFixed(2) } seconds`);
             if (total.error) console.log(`${ total.error } request(s) has been failed`);
-            process.exit(0);
+            client.shutdown(() => client.disconnect());
         }
     });
 }

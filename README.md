@@ -45,13 +45,10 @@ String responses are reserved for errors. If you send a string back, it means th
 - **port        :** Start point for port range. If you set server instance looks up for its port starting from this number. It's 8000 by default.
 - **redis       :** ioredis instance
 - **secret      :** Encryption key for auto discovery feature. It's a string "dot" by default.
-- **shutdown    :** Min. delay for clean shutdown. It's 5000 miliseconds by default.
 
 ### Client
 
 - **debug       :** Debug mode. It's disabled by default.
-- **delay       :** This parameter provides some time before actually trying to send incoming requests.
-                    Thus, client sockets would be initiated correctly before trying to send anything.
 - **delimiter   :** Delimiter between service and method names. It must be same value in server and client instances. It's a single dot(.) by default.
 - **discover    :** Parameters for node-discover module. Please see official repository for more information.
 - **group       :** This parameter is for grouping services. If you set a value, client instance connects matched servers only.

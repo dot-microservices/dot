@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",
@@ -14,7 +14,8 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec"
+    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec",
+    "test:redis": "node tests/client-redis.test.js | ./node_modules/.bin/tap-spec"
   },
   "author": {
     "name": "Umut Aydin"
@@ -33,11 +34,11 @@
   "license": "MIT",
   "dependencies": {
     "axon": "^2.0.3",
-    "colors": "^1.3.2",
     "date-fns": "^1.29.0",
     "is_js": "^0.9.0",
     "local-ip": "^2.0.0",
     "node-discover": "^1.0.0",
+    "pino": "^5.12.2",
     "portfinder": "^1.0.19",
     "shortid": "^2.2.13"
   },
@@ -47,6 +48,6 @@
     "eslint-plugin-import": "^2.14.0",
     "ioredis": "^4.9.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.9.1"
+    "tape": "^4.10.1"
   }
 }

@@ -37,7 +37,7 @@ class Client extends Base {
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
         const address = `${ ad.address }:${ ad.advertisement.port }`;
-        this.success(ad);
+        this.logger.info(ad);
         this._instances.push(address);
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
@@ -60,14 +60,14 @@ class Client extends Base {
         else if (is.not.number(ad.advertisement.port)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
-        this.warning(ad);
+        this.logger.warn(ad);
         for (let service of ad.advertisement.services) {
             if (this._sockets.hasOwnProperty(service))
                 if (this._sockets[service].hasOwnProperty(ad.id)) {
                     try {
                         this._sockets[service][ad.id].close();
                     } catch(e) {
-                        this.fail(e.message);
+                        this.logger.error(e);
                     }
                     delete this._sockets[service][ad.id];
                 }
@@ -94,19 +94,11 @@ class Client extends Base {
      * @description Sends a request
      * @param {String} path service call
      * @param {Any} payload data
-     * @param {Number} [timestamp]
      * @param {Function} cb callback
      * @memberof Client
      */
-    send(path, payload, timestamp, cb) {
-        if (is.function(timestamp)) {
-            cb = timestamp;
-            timestamp = 0;
-        } else if (is.not.function(cb)) {
-            cb = function() {};
-            if (is.not.number(timestamp)) timestamp = 0;
-        }
-
+    send(path, payload, cb) {
+        if (is.not.function(cb)) cb = function() {};
         if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
 
         const delimiter = this.options.delimiter;
@@ -122,17 +114,19 @@ class Client extends Base {
             try {
                 if (useTimeout)
                     t_o = setTimeout(() => {
-                        t_o = null;
+                        t_o = undefined;
                         cb(new Error('REQUEST_TIMEOUT'));
                     }, timeout);
                 socket.send(path, payload, response => {
+                    if (is.undefined(t_o)) return; // * timeout already fired!
+
                     if (t_o) clearTimeout(t_o);
                     if (is.existy(response) && is.not.string(response)) return cb(response);
 
                     cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
                 });
             } catch(e) {
-                this.fail(e.message);
+                this.logger.error(e);
                 cb(e);
             }
         } else cb(new Error('INVALID_SERVICE'));
@@ -156,7 +150,7 @@ class Client extends Base {
                     try {
                         this._sockets[service][id].send(this.COMMAND_CLEAN_SHUTDOWN, {});
                     } catch (e) {
-                        this.fail(`${ service } @ ${ id } ${ e.message }`);
+                        this.logger.error(`${ service } @ ${ id } ${ e.message }`);
                     }
                 }
         cb();
@@ -170,7 +164,7 @@ class Client extends Base {
         for (let service of Object.keys(this._sockets))
             for (let id of Object.keys(this._sockets[service])) {
                 this._sockets[service][id].close();
-                this.warning(`${ service } @ ${ id } closed`);
+                this.logger.warn(`${ service } @ ${ id } closed`);
             }
         if (this.ad) this.ad.stop();
         if (this.options.redis) {

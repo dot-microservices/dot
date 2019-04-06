@@ -22,7 +22,7 @@ setTimeout(() => {
             else if (response === payload) assert.ok(response, `${response} received successfully!`);
             else assert.fail('invalid response');
             assert.end();
-            process.exit(0);
+            client.shutdown(() => client.disconnect());
         });
     });
 }, 3000);

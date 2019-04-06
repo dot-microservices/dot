@@ -15,32 +15,22 @@ const child = spawn(server);
 
 setTimeout(() => {
     test('Check basic socket communication', function (assert) {
-        let started = false;
+        const started = setTimeout(() => {
+            assert.fail('service time out');
+            child.stdin.pause();
+            child.kill();
+            client.shutdown(() => client.disconnect());
+            assert.end();
+        }, 5000);
 
         const payload = Math.random();
         client.send('t.echo', payload, response => {
-            started = true;
+            clearTimeout(started);
             if (is.error(response)) assert.fail(response.message);
             else if (response === payload) assert.ok(response, `${response} received successfully!`);
             else assert.fail('invalid response');
-            client.shutdown();
-            child.on('exit', () => {
-                child.kill();
-                client.disconnect();
-                assert.end();
-                process.exit(0);
-            });
+            client.shutdown(() => client.disconnect());
+            assert.end();
         });
-
-        setTimeout(() => {
-            if (!started) {
-                assert.fail('service time out');
-                child.stdin.pause();
-                child.kill();
-                client.disconnect();
-                assert.end();
-                process.exit(0);
-            }
-        }, 5000);
     });
 }, 2000);

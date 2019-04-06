@@ -82,6 +82,11 @@ class SampleService {
     static test(request, reply) {
         reply(request);
     }
+
+    static async test2(request) {
+        if (!request) throw new Error('invalid request');
+        return request;
+    }
 }
 
 const server = new Server();

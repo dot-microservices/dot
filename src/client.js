@@ -99,14 +99,15 @@ class Client extends Base {
      */
     send(path, payload, cb) {
         if (is.not.function(cb)) cb = function() {};
-        if (is.not.string(path) || is.empty(path)) return cb(new Error('INVALID_PATH'));
+        if (is.not.string(path) || is.empty(path))
+            return is.function(cb) ? cb(new Error('INVALID_PATH')) : undefined;
 
         const delimiter = this.options.delimiter;
         const timeout = this.options.timeout, useTimeout = is.number(timeout) && timeout > 0;
         const service = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
-        if (service.length < 2) return cb(new Error('MISSING_METHOD'));
+        if (service.length < 2) return is.function(cb) ? cb(new Error('MISSING_METHOD')): undefined;
         else if (!service[1].trim().length || service[1].charAt(0) === '_')
-            return cb(new Error('INVALID_METHOD'));
+            return is.function(cb) ? cb(new Error('INVALID_METHOD')) : undefined;
 
         const socket = this._getSocket(service[0]);
         if (socket) {
@@ -115,10 +116,10 @@ class Client extends Base {
                 if (useTimeout)
                     t_o = setTimeout(() => {
                         t_o = undefined;
-                        cb(new Error('REQUEST_TIMEOUT'));
+                        if (is.function(cb)) cb(new Error('REQUEST_TIMEOUT'));
                     }, timeout);
                 socket.send(path, payload, response => {
-                    if (is.undefined(t_o)) return; // * timeout already fired!
+                    if (is.undefined(t_o) || is.not.function(cb)) return; // * timeout already fired!
 
                     if (t_o) clearTimeout(t_o);
                     if (is.existy(response) && is.not.string(response)) return cb(response);

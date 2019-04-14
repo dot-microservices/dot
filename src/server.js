@@ -6,7 +6,7 @@ const is = require('is_js');
 const localIP = require('local-ip');
 const joinPath = require('path').join;
 const portfinder = require('portfinder');
-const readdir = require('fs').readdir;
+const readdir = require('fs').readdirSync;
 const shortid = require('shortid');
 
 const Base = require('./base');
@@ -65,12 +65,9 @@ class Server extends Base {
         if (is.not.string(dir)) throw new Error('you must provide a path to service classes');
         else if (!exists(dir)) throw new Error('invalid path');
 
-        readdir(dir, (error, files) => {
-            if (error) throw error;
-
-            for (let file of files)
-                this.addService(require(joinPath(dir, file)));
-        });
+        const files = readdir(dir);
+        for (let file of files)
+            this.addService(require(joinPath(dir, file)));
     }
 
     /**

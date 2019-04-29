@@ -53,6 +53,7 @@ String responses are reserved for errors. If you send a string back, it means th
 - **discover    :** Parameters for node-discover module. Please see official repository for more information.
 - **group       :** This parameter is for grouping services. If you set a value, client instance connects matched servers only.
 - **iface       :** Network interface for detecting IP. Default is eth0. This will be ignored if you don't provide redis parameter.
+- **ping        :** Time period in milliseconds for sending ping requests
 - **redis       :** ioredis instance
 - **secret      :** Encryption key for auto discovery feature. It's a string "dot" by default.
 - **timeout     :** Request timeout. Socket communication has auto recovery feature but in some cases you might want to have a timeout option.

@@ -107,9 +107,14 @@ class Server extends Base {
 
             const service = path.shift(), method = path.shift();
             if (!this._services.hasOwnProperty(service)) {
-                if (service === this.COMMAND_CLEAN_SHUTDOWN) {
+                switch (service) {
+                case this.COMMAND_CLEAN_SHUTDOWN:
                     return this.shutdown();
-                } else return reply('INVALID_SERVICE');
+                case this.COMMAND_PING:
+                    return reply(this.COMMAND_PONG);
+                default:
+                    return reply('INVALID_SERVICE');
+                }
             } else if (!method || is.empty(method)) return reply('MISSING_METHOD');
             else if (method.charAt(0) === '_') return reply('INVALID_METHOD');
             else if (!this._services[service].hasOwnProperty(method)) return reply('INVALID_METHOD');
@@ -172,8 +177,9 @@ class Server extends Base {
         if (is.not.function(this.options.redis.publish))
             throw new Error('redis parameter must be an instance of ioredis client');
 
-        this.interval = setInterval(() => this.options.redis.publish('up', this.__payload()),
-            is.object(this.options.discover) ? this.options.discover.checkInterval || 3000 : 3000);
+        this.interval = setInterval(() =>
+            this.options.redis
+                .publish('up', this.__payload()), this.getPeriodInMS());
     }
 
     /**

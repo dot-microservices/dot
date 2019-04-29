@@ -41,7 +41,7 @@ class Client extends Base {
         this._instances.push(address);
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
-
+        socket._ts = Date.now();
         for (let service of ad.advertisement.services) {
             if (!this._sockets.hasOwnProperty(service)) this._sockets[service] = {};
             if (!this._sockets[service].hasOwnProperty(ad.id))
@@ -126,6 +126,7 @@ class Client extends Base {
 
                     cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
                 });
+                socket._ts = Date.now();
             } catch(e) {
                 this.logger.error(e);
                 cb(e);
@@ -168,6 +169,7 @@ class Client extends Base {
                 this.logger.warn(`${ service } @ ${ id } closed`);
             }
         if (this.ad) this.ad.stop();
+        if (this.interval) clearInterval(this.interval);
         if (this.options.redis) {
             this.options.redis.unsubscribe();
             this.options.redis.disconnect();
@@ -197,6 +199,40 @@ class Client extends Base {
         });
 
         this.options.redis.subscribe('up', 'down');
+        this.interval = setInterval(() => this._interval(), this.getPeriodInMS());
+    }
+
+    /**
+     * @description Background task for ping / pong
+     * @private
+     * @memberof Client
+     */
+    _interval() {
+        const expire = is.number(this.options.ping) ? this.options.ping : this.getPeriodInMS() * 3;
+        for (let service of Object.keys(this._sockets)) {
+            if (is.object(this._sockets[service]) && is.not.empty(this._sockets[service])) {
+                for (let id of Object.keys(this._sockets[service])) {
+                    const socket = this._sockets[service][id];
+                    if (socket && socket._ts) {
+                        const diff = Date.now() - socket._ts;
+                        if (diff > expire) this._ping(socket);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @description sends ping request
+     * @param {axon.socket} socket
+     * @param {function} cb callback
+     * @private
+     * @memberof Client
+     */
+    _ping(socket, cb) {
+        if (is.not.function(cb)) cb = () => {};
+        socket.send(this.COMMAND_PING, {}, cb);
+        socket._ts = Date.now();
     }
 }
 

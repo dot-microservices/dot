@@ -16,6 +16,8 @@ class Base {
      */
     constructor(options) {
         this.COMMAND_CLEAN_SHUTDOWN = '#CS#';
+        this.COMMAND_PING = '#PI#';
+        this.COMMAND_PONG = '#PO#';
         this.options = { delimiter: '.', iface: 'eth0', logs: 'error', secret: 'dot' };
         if (is.object(options) && is.not.array(options))
             this.options = Object.assign(this.options, options);
@@ -50,6 +52,16 @@ class Base {
         if (service.hasOwnProperty('_name') && is.function(service._name)) return service._name();
 
         return `${ service.name.charAt(0).toLowerCase() }${ service.name.slice(1) }`;
+    }
+
+    /**
+     * @description Returns interval time in milliseconds
+     * @returns Number
+     * @private
+     * @memberof Base
+     */
+    getPeriodInMS() {
+        return is.object(this.options.discover) ? this.options.discover.checkInterval || 3000 : 3000;
     }
 }
 

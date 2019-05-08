@@ -110,8 +110,6 @@ class Server extends Base {
                 switch (service) {
                 case this.COMMAND_CLEAN_SHUTDOWN:
                     return this.shutdown();
-                case this.COMMAND_PING:
-                    return reply(this.COMMAND_PONG);
                 default:
                     return reply('INVALID_SERVICE');
                 }

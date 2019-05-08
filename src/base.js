@@ -15,8 +15,6 @@ class Base {
      */
     constructor(options) {
         this.COMMAND_CLEAN_SHUTDOWN = '#CS#';
-        this.COMMAND_PING = '#PI#';
-        this.COMMAND_PONG = '#PO#';
         this.options = { delimiter: '.', iface: 'eth0', debug: false, secret: 'dot' };
         if (is.object(options) && is.not.array(options))
             this.options = Object.assign(this.options, options);

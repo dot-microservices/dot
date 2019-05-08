@@ -2,7 +2,6 @@
 
 const discover = require('node-discover');
 const is = require('is_js');
-const pino = require('pino');
 
 /**
  * @description Base class for Client and Server
@@ -18,10 +17,9 @@ class Base {
         this.COMMAND_CLEAN_SHUTDOWN = '#CS#';
         this.COMMAND_PING = '#PI#';
         this.COMMAND_PONG = '#PO#';
-        this.options = { delimiter: '.', iface: 'eth0', logs: 'error', secret: 'dot' };
+        this.options = { delimiter: '.', iface: 'eth0', debug: false, secret: 'dot' };
         if (is.object(options) && is.not.array(options))
             this.options = Object.assign(this.options, options);
-        this.logger = pino({ level: this.options.log || this.options.logs });
     }
 
     /**

@@ -37,7 +37,7 @@ class Client extends Base {
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
         const address = `${ ad.address }:${ ad.advertisement.port }`;
-        this.logger.info(ad);
+        if (this.options.debug) console.log(`service found: ${ JSON.stringify(ad) }`);
         this._instances.push(address);
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
@@ -60,14 +60,14 @@ class Client extends Base {
         else if (is.not.number(ad.advertisement.port)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
-        this.logger.warn(ad);
+        if (this.options.debug) console.log(`service found: ${ JSON.stringify(ad) }`);
         for (let service of ad.advertisement.services) {
             if (this._sockets.hasOwnProperty(service))
                 if (this._sockets[service].hasOwnProperty(ad.id)) {
                     try {
                         this._sockets[service][ad.id].close();
                     } catch(e) {
-                        this.logger.error(e);
+                        if (this.options.debug) console.log(e);
                     }
                     delete this._sockets[service][ad.id];
                 }
@@ -100,14 +100,14 @@ class Client extends Base {
     send(path, payload, cb) {
         if (is.not.function(cb)) cb = function() {};
         if (is.not.string(path) || is.empty(path))
-            return is.function(cb) ? cb(new Error('INVALID_PATH')) : undefined;
+            return cb(new Error('INVALID_PATH'));
 
         const delimiter = this.options.delimiter;
         const timeout = this.options.timeout, useTimeout = is.number(timeout) && timeout > 0;
         const service = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
-        if (service.length < 2) return is.function(cb) ? cb(new Error('MISSING_METHOD')): undefined;
+        if (service.length < 2) return cb(new Error('MISSING_METHOD'));
         else if (!service[1].trim().length || service[1].charAt(0) === '_')
-            return is.function(cb) ? cb(new Error('INVALID_METHOD')) : undefined;
+            return cb(new Error('INVALID_METHOD'));
 
         const socket = this._getSocket(service[0]);
         if (socket) {
@@ -116,19 +116,18 @@ class Client extends Base {
                 if (useTimeout)
                     t_o = setTimeout(() => {
                         t_o = undefined;
-                        if (is.function(cb)) cb(new Error('REQUEST_TIMEOUT'));
+                        cb(new Error('REQUEST_TIMEOUT'));
                     }, timeout);
                 socket.send(path, payload, response => {
-                    if (is.undefined(t_o) || is.not.function(cb)) return; // * timeout already fired!
-
-                    if (t_o) clearTimeout(t_o);
-                    if (is.existy(response) && is.not.string(response)) return cb(response);
-
-                    cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
+                    if (is.not.undefined(t_o)) {
+                        if (t_o) clearTimeout(t_o);
+                        if (is.existy(response) && is.not.string(response)) cb(response);
+                        else cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
+                    }
                 });
                 socket._ts = Date.now();
             } catch(e) {
-                this.logger.error(e);
+                if (this.options.debug) console.log(e);
                 cb(e);
             }
         } else cb(new Error('INVALID_SERVICE'));
@@ -152,7 +151,7 @@ class Client extends Base {
                     try {
                         this._sockets[service][id].send(this.COMMAND_CLEAN_SHUTDOWN, {});
                     } catch (e) {
-                        this.logger.error(`${ service } @ ${ id } ${ e.message }`);
+                        if (this.options.debug) console.log(`${ service } @ ${ id } ${ e.message }`);
                     }
                 }
         cb();
@@ -166,10 +165,9 @@ class Client extends Base {
         for (let service of Object.keys(this._sockets))
             for (let id of Object.keys(this._sockets[service])) {
                 this._sockets[service][id].close();
-                this.logger.warn(`${ service } @ ${ id } closed`);
+                if (this.options.debug) console.log(`${ service } @ ${ id } closed`);
             }
         if (this.ad) this.ad.stop();
-        if (this.interval) clearInterval(this.interval);
         if (this.options.redis) {
             this.options.redis.unsubscribe();
             this.options.redis.disconnect();
@@ -199,40 +197,6 @@ class Client extends Base {
         });
 
         this.options.redis.subscribe('up', 'down');
-        this.interval = setInterval(() => this._interval(), this.getPeriodInMS());
-    }
-
-    /**
-     * @description Background task for ping / pong
-     * @private
-     * @memberof Client
-     */
-    _interval() {
-        const expire = is.number(this.options.ping) ? this.options.ping : this.getPeriodInMS() * 3;
-        for (let service of Object.keys(this._sockets)) {
-            if (is.object(this._sockets[service]) && is.not.empty(this._sockets[service])) {
-                for (let id of Object.keys(this._sockets[service])) {
-                    const socket = this._sockets[service][id];
-                    if (socket && socket._ts) {
-                        const diff = Date.now() - socket._ts;
-                        if (diff > expire) this._ping(socket);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @description sends ping request
-     * @param {axon.socket} socket
-     * @param {function} cb callback
-     * @private
-     * @memberof Client
-     */
-    _ping(socket, cb) {
-        if (is.not.function(cb)) cb = () => {};
-        socket.send(this.COMMAND_PING, {}, cb);
-        socket._ts = Date.now();
     }
 }
 

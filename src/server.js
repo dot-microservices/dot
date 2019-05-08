@@ -124,9 +124,11 @@ class Server extends Base {
                 const p = this._services[service][method](payload, reply);
                 if (p instanceof Promise)
                     p.then(r => r !== undefined && reply(r))
-                        .catch(e => this.logger.error(e));
+                        .catch(e => {
+                            if (this.options.debug) console.log(e);
+                        });
             } catch (e) {
-                this.logger.error(e);
+                if (this.options.debug) console.log(e);
             }
         });
     }
@@ -142,19 +144,19 @@ class Server extends Base {
 
         this._flag.l = true;
         this._socket.on('bind', () => {
-            this.logger.info(`ready on #${ this.options.port }`);
+            if (this.options.debug) console.log(`ready on #${ this.options.port }`);
             this._serviceRegistry();
         });
-        this._socket.on('error', error => {
-            this.logger.error(error);
+        this._socket.on('error', e => {
+            if (this.options.debug) console.log(e);
         });
         this._socket.on('connect', s => {
             s._id = shortid();
             if (s._peername && s._peername.address) s._ip = s._peername.address;
-            this.logger.info(`${ s._id }@${ s._ip } connected`);
+            if (this.options.debug) console.log(`${ s._id }@${ s._ip } connected`);
         });
         this._socket.on('disconnect', s => {
-            this.logger.warn(`${ s._id }@${ s._ip } disconnected`);
+            if (this.options.debug) console.log(`${ s._id }@${ s._ip } disconnected`);
         });
         this._onMessage();
     }
@@ -211,7 +213,7 @@ class Server extends Base {
             this.options.redis.publish('down', this.__payload());
             this.options.redis.disconnect();
         }
-        this.logger.info('server closed');
+        if (this.options.debug) console.log('server closed');
     }
 }
 

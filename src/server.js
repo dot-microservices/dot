@@ -7,7 +7,6 @@ const localIP = require('local-ip');
 const joinPath = require('path').join;
 const portfinder = require('portfinder');
 const readdir = require('fs').readdirSync;
-const shortid = require('shortid');
 
 const Base = require('./base');
 
@@ -155,12 +154,10 @@ class Server extends Base {
             if (this.options.debug) console.log(e);
         });
         this._socket.on('connect', s => {
-            s._id = shortid();
-            if (s._peername && s._peername.address) s._ip = s._peername.address;
-            if (this.options.debug) console.log(`${ s._id }@${ s._ip } connected`);
+            if (this.options.debug) console.log(`${ s._peername.address } connected`);
         });
         this._socket.on('disconnect', s => {
-            if (this.options.debug) console.log(`${ s._id }@${ s._ip } disconnected`);
+            if (this.options.debug) console.log(`${ s._peername.address } disconnected`);
         });
         this._onMessage();
     }

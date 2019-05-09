@@ -143,7 +143,13 @@ class Server extends Base {
         this._flag.l = true;
         this._socket.on('bind', () => {
             if (this.options.debug) console.log(`ready on #${ this.options.port }`);
-            this._serviceRegistry();
+            this.advertise({
+                advertisement: {
+                    port: this.options.port,
+                    group: this.options.group,
+                    services: Object.keys(this._services)
+                }
+            });
         });
         this._socket.on('error', e => {
             if (this.options.debug) console.log(e);
@@ -157,29 +163,6 @@ class Server extends Base {
             if (this.options.debug) console.log(`${ s._id }@${ s._ip } disconnected`);
         });
         this._onMessage();
-    }
-
-    /**
-     * @description Handles service registry procedure by provided options
-     * @access private
-     * @memberof Server
-     */
-    _serviceRegistry() {
-        if (!this.options.hasOwnProperty('redis'))
-            return this.advertise({
-                advertisement: {
-                    port: this.options.port,
-                    group: this.options.group,
-                    services: Object.keys(this._services)
-                }
-            });
-
-        if (is.not.function(this.options.redis.publish))
-            throw new Error('redis parameter must be an instance of ioredis client');
-
-        this.interval = setInterval(() =>
-            this.options.redis
-                .publish('up', this.__payload()), this.getPeriodInMS());
     }
 
     /**
@@ -207,10 +190,6 @@ class Server extends Base {
         if (this.ad) this.ad.stop();
         this._socket.close();
         if (this.interval) clearInterval(this.interval);
-        if (this.options.redis) {
-            this.options.redis.publish('down', this.__payload());
-            this.options.redis.disconnect();
-        }
         if (this.options.debug) console.log('server closed');
     }
 }

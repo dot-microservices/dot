@@ -21,7 +21,7 @@ class Client extends Base {
         this._flag = { f: false };
         this._instances = [];
         this._sockets = {};
-        this._serviceRegistry();
+        this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
     }
 
     /**
@@ -168,35 +168,6 @@ class Client extends Base {
                 if (this.options.debug) console.log(`${ service } @ ${ id } closed`);
             }
         if (this.ad) this.ad.stop();
-        if (this.options.redis) {
-            this.options.redis.unsubscribe();
-            this.options.redis.disconnect();
-        }
-    }
-
-    /**
-     * @description Handles service registry procedure by provided options
-     * @access private
-     * @memberof Client
-     */
-    _serviceRegistry() {
-        if (!this.options.hasOwnProperty('redis'))
-            return this.advertise({ client: true }, this._serviceFound.bind(this), this._serviceLost.bind(this));
-
-        if (is.not.function(this.options.redis.publish))
-            throw new Error('redis parameter must be an instance of ioredis client');
-
-        this.options.redis.on('message', (channel, ad) => {
-            try {
-                ad = JSON.parse(ad);
-                if (channel === 'up') this._serviceFound(ad);
-                else if (channel === 'down') this._serviceLost(ad);
-            } catch (e) {
-                return;
-            }
-        });
-
-        this.options.redis.subscribe('up', 'down');
     }
 }
 

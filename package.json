@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.8.7",
+  "version": "0.9.0",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",
@@ -9,13 +9,11 @@
     "rpc",
     "zero configuration",
     "zero-conf",
-    "auto discovery",
-    "service registry"
+    "auto discovery"
   ],
   "main": "index.js",
   "scripts": {
-    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec",
-    "test:redis": "node tests/client-redis.test.js | ./node_modules/.bin/tap-spec"
+    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec"
   },
   "author": {
     "name": "Umut Aydin"
@@ -45,7 +43,6 @@
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.17.2",
-    "ioredis": "^4.9.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.10.1"
   }

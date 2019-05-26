@@ -41,7 +41,6 @@ class Client extends Base {
         this._instances.push(address);
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
-        socket._ts = Date.now();
         for (let service of ad.advertisement.services) {
             if (!this._sockets.hasOwnProperty(service)) this._sockets[service] = {};
             if (!this._sockets[service].hasOwnProperty(ad.id))
@@ -125,8 +124,8 @@ class Client extends Base {
                         else cb(is.empty(response) ? new Error('INVALID_RESPONSE') : new Error(response));
                     }
                 });
-                socket._ts = Date.now();
             } catch(e) {
+                if (t_o) clearTimeout(t_o);
                 if (this.options.debug) console.log(e);
                 cb(e);
             }

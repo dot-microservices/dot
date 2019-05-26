@@ -50,7 +50,6 @@ String responses are reserved for errors. If you send a string back, it means th
 - **delimiter   :** Delimiter between service and method names. It must be same value in server and client instances. It's a single dot(.) by default.
 - **discover    :** Parameters for node-discover module. Please see official repository for more information.
 - **group       :** This parameter is for grouping services. If you set a value, client instance connects matched servers only.
-- **ping        :** Time period in milliseconds for sending ping requests
 - **secret      :** Encryption key for auto discovery feature. It's a string "dot" by default.
 - **timeout     :** Request timeout. Socket communication has auto recovery feature but in some cases you might want to have a timeout option.
 

@@ -117,16 +117,12 @@ class Server extends Base {
             else if (!this._services[service].hasOwnProperty(method)) return reply('INVALID_METHOD');
             else if (is.not.function(this._services[service][method])) return reply('INVALID_METHOD');
 
-            try {
-                const p = this._services[service][method](payload, reply);
-                if (p instanceof Promise)
-                    p.then(r => r !== undefined && reply(r))
-                        .catch(e => {
-                            if (this.options.debug) console.log(e);
-                        });
-            } catch (e) {
-                if (this.options.debug) console.log(e);
-            }
+            const p = this._services[service][method](payload, reply);
+            if (p instanceof Promise)
+                p.then(r => r !== undefined && reply(r))
+                    .catch(e => {
+                        if (this.options.debug) console.log(e);
+                    });
         });
     }
 

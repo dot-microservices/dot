@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",
@@ -35,10 +35,10 @@
     "is_js": "^0.9.0",
     "local-ip": "^2.0.0",
     "node-discover": "^1.0.0",
-    "portfinder": "^1.0.21"
+    "portfinder": "^1.0.23"
   },
   "devDependencies": {
-    "eslint": "^6.1.0",
+    "eslint": "^6.2.2",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "tap-spec": "^5.0.0",

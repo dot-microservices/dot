@@ -2,8 +2,8 @@
 
 const axon = require('axon');
 const exists = require('fs').existsSync;
+const ip = require('ip');
 const is = require('is_js');
-const localIP = require('local-ip');
 const joinPath = require('path').join;
 const portfinder = require('portfinder');
 const readdir = require('fs').readdirSync;
@@ -105,7 +105,7 @@ class Server extends Base {
             path = path.split(is.string(delimiter) && is.not.empty(delimiter) ? delimiter : '.');
 
             const service = path.shift(), method = path.shift();
-            if (!this._services.hasOwnProperty(service)) {
+            if (!this._services[service]) {
                 switch (service) {
                 case this.COMMAND_CLEAN_SHUTDOWN:
                     return this.shutdown();
@@ -114,7 +114,7 @@ class Server extends Base {
                 }
             } else if (!method || is.empty(method)) return reply('MISSING_METHOD');
             else if (method.charAt(0) === '_') return reply('INVALID_METHOD');
-            else if (!this._services[service].hasOwnProperty(method)) return reply('INVALID_METHOD');
+            else if (!this._services[service][method]) return reply('INVALID_METHOD');
             else if (is.not.function(this._services[service][method])) return reply('INVALID_METHOD');
 
             const p = this._services[service][method](payload, reply);
@@ -166,7 +166,7 @@ class Server extends Base {
      */
     __payload() {
         return JSON.stringify({
-            address: localIP(this.options.iface),
+            address: ip.address(this.options.iface),
             advertisement: {
                 port: this.options.port,
                 group: this.options.group,

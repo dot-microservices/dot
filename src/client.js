@@ -31,7 +31,7 @@ class Client extends Base {
      * @memberof Client
      */
     _serviceFound(ad) {
-        if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
+        if (!('advertisement' in ad) || is.not.object(ad.advertisement)) return;
         else if (is.not.number(ad.advertisement.port)) return;
         else if (is.not.string(ad.address) || is.not.ip(ad.address)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
@@ -42,9 +42,8 @@ class Client extends Base {
         const socket = axon.socket('req');
         socket.connect(ad.advertisement.port, ad.address);
         for (let service of ad.advertisement.services) {
-            if (!this._sockets.hasOwnProperty(service)) this._sockets[service] = {};
-            if (!this._sockets[service].hasOwnProperty(ad.id))
-                this._sockets[service][ad.id] = socket;
+            if (!(service in this._sockets)) this._sockets[service] = {};
+            if (!(ad.id in this._sockets[service])) this._sockets[service][ad.id] = socket;
         }
     }
 
@@ -55,14 +54,14 @@ class Client extends Base {
      * @memberof Client
      */
     _serviceLost(ad) {
-        if (!ad.hasOwnProperty('advertisement') || is.not.object(ad.advertisement)) return;
+        if (!('advertisement' in ad) || is.not.object(ad.advertisement)) return;
         else if (is.not.number(ad.advertisement.port)) return;
         else if (is.not.array(ad.advertisement.services) || is.empty(ad.advertisement.services)) return;
 
         if (this.options.debug) console.log(`service found: ${ JSON.stringify(ad) }`);
         for (let service of ad.advertisement.services) {
-            if (this._sockets.hasOwnProperty(service))
-                if (this._sockets[service].hasOwnProperty(ad.id)) {
+            if (service in this._sockets)
+                if (ad.id in this._sockets[service]) {
                     try {
                         this._sockets[service][ad.id].close();
                     } catch(e) {
@@ -81,7 +80,7 @@ class Client extends Base {
      * @memberof Client
      */
     _getSocket(service) {
-        if (!this._sockets.hasOwnProperty(service)) return null;
+        if (!(service in this._sockets)) return null;
 
         const sockets = Object.keys(this._sockets[service]);
         if (!sockets.length) return null;

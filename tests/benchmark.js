@@ -18,8 +18,8 @@ function request(i) {
 
         const duration = Date.now() - now;
         total.time += duration;
-        if (!total.hasOwnProperty('min')) total.min = duration;
-        if (!total.hasOwnProperty('max')) total.max = duration;
+        if (!('min' in total)) total.min = duration;
+        if (!('max' in total)) total.max = duration;
         if (duration < total.min) total.min = duration;
         if (duration > total.max) total.max = duration;
 

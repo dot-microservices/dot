@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",
@@ -13,7 +13,8 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "node tests/client.test.js | ./node_modules/.bin/tap-spec"
+    "coverage": "./node_modules/.bin/jest --coverage",
+    "test": "./node_modules/.bin/jest"
   },
   "author": {
     "name": "Umut Aydin"
@@ -41,7 +42,9 @@
     "eslint": "^6.2.2",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "tap-spec": "^5.0.0",
-    "tape": "^4.11.0"
+    "jest": "^24.9.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }

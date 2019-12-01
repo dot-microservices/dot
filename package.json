@@ -1,6 +1,6 @@
 {
   "name": "node-dot",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "a minimalist toolkit for building fast, decentralized, scalable and fault tolerant microservices",
   "keywords": [
     "microservice",
@@ -24,11 +24,11 @@
   },
   "homepage": "https://dot.js.org/",
   "bugs": {
-    "url": "https://github.com/Dvs-Bilisim/dot/issues"
+    "url": "https://github.com/dot-microservices/dot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Dvs-Bilisim/dot.git"
+    "url": "git://github.com/dot-microservices/dot.git"
   },
   "license": "MIT",
   "dependencies": {
@@ -36,10 +36,10 @@
     "ip": "^1.1.5",
     "is_js": "^0.9.0",
     "node-discover": "^1.0.0",
-    "portfinder": "^1.0.23"
+    "portfinder": "^1.0.25"
   },
   "devDependencies": {
-    "eslint": "^6.2.2",
+    "eslint": "^6.7.2",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "jest": "^24.9.0"
